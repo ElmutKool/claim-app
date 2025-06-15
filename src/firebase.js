@@ -18,4 +18,4 @@ const provider = new GoogleAuthProvider();
 
 const signInWithGoogle = () => signInWithPopup(auth, provider);
 
-export { auth, firestore as db, signInWithGoogle };
+export { auth, firestore, firestore as db, signInWithGoogle };
