@@ -3,7 +3,7 @@ import './App.css';
 import { auth, firestore, signInWithGoogle } from './firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import WalletConnect from './WalletConnect';
+import WalletConnect from './WalletConnect.jsx';
 import Withdraw from './Withdraw';
 import Leaderboard from './Leaderboard';
 
