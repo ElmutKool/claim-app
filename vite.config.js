@@ -4,13 +4,13 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
-  base: '/', // <-- 💡 VÄGA oluline Vercelis, muidu ei leia /dashboard jms
+  base: '/', // vajalik Vercelis, et kõik route’id toimiks
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
   },
-  server: {
-    historyApiFallback: true,
+  build: {
+    outDir: 'dist', // vaikimisi 'dist', võid säilitada või eemaldada
   },
 });
