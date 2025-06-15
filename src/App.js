@@ -3,6 +3,9 @@ import './App.css';
 import { auth, firestore, signInWithGoogle } from './firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import WalletConnect from './WalletConnect';
+import Withdraw from './Withdraw';
+import Leaderboard from './Leaderboard';
 
 const CLAIM_INTERVAL = 3 * 60 * 60 * 1000; // 3h
 
@@ -63,33 +66,38 @@ function App() {
   };
 
   return (
-    <div style={{ textAlign: 'center', padding: 40 }}>
-      <h1>$CLAIM</h1>
-      {loading ? (
-        <p>Loading...</p>
-      ) : user ? (
-        <>
-          <p>Hi, {user.displayName}!</p>
-          <p>Balance: <strong>{balance}</strong> $CLAIM</p>
-          {canClaim ? (
-            <>
-              <button onClick={() => handleClaim(1)}>Claim</button>
-              <button onClick={() => handleClaim(2)}>Claim x2 (Ad)</button>
-            </>
-          ) : (
-            <p>Next claim in: {showCountdown()}</p>
-          )}
-          <br />
-          <button onClick={() => signOut(auth)}>Log out</button>
-        </>
-      ) : (
-        <>
-          <p>Log in to start claiming free $CLAIM every 3h</p>
-          <button onClick={signInWithGoogle}>Sign in with Google</button>
-        </>
-      )}
-    </div>
-  );
+  <div style={{ textAlign: 'center', padding: 40 }}>
+    <h1>$CLAIM</h1>
+    {loading ? (
+      <p>Loading...</p>
+    ) : user ? (
+      <>
+        <p>Hi, {user.displayName}!</p>
+        <p>Balance: <strong>{balance}</strong> $CLAIM</p>
+        {canClaim ? (
+          <>
+            <button onClick={() => handleClaim(1)}>Claim</button>
+            <button onClick={() => handleClaim(2)}>Claim x2 (Ad)</button>
+          </>
+        ) : (
+          <p>Next claim in: {showCountdown()}</p>
+        )}
+        <br />
+        <button onClick={() => signOut(auth)}>Log out</button>
+
+        <hr style={{ margin: '30px 0' }} />
+        <Withdraw user={user} balance={balance} />
+        <WalletConnect user={user} wallet={userSnap?.data()?.wallet} />
+        <Leaderboard />
+      </>
+    ) : (
+      <>
+        <p>Log in to start claiming free $CLAIM every 3h</p>
+        <button onClick={signInWithGoogle}>Sign in with Google</button>
+      </>
+    )}
+  </div>
+);
 }
 
 export default App;
