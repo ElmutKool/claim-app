@@ -2,36 +2,64 @@ import React, { useState } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { firestore } from './firebase';
 
-function Withdraw({ user, balance }) {
+export default function Withdraw({ user, balance }) {
   const [withdrawing, setWithdrawing] = useState(false);
+  const [status, setStatus] = useState('');
 
   const handleWithdraw = async () => {
-    if (!user || balance < 10) return alert('Min withdrawal: 10 $CLAIM');
-    const confirmed = window.confirm('Watch ad to process withdrawal?');
+    if (!user) return;
+
+    if (balance < 10) {
+      setStatus('❌ Minimum withdrawal is 10 $CLAIM.');
+      return;
+    }
+
+    const confirmed = window.confirm('🎬 Watch a short ad to confirm your withdrawal?');
     if (!confirmed) return;
 
-    // Simuleeri ad vaatamist
-    alert('🟡 Ad watched!');
+    // Reklaami simuleerimine
+    alert('✅ Ad watched!');
     setWithdrawing(true);
+    setStatus('⏳ Submitting withdrawal request...');
 
-    await updateDoc(doc(firestore, 'users', user.uid), {
-      balance: 0,
-      lastWithdrawal: Date.now(),
-    });
-
-    setWithdrawing(false);
-    alert('Withdrawal request submitted!');
+    try {
+      await updateDoc(doc(firestore, 'users', user.uid), {
+        balance: 0,
+        lastWithdrawal: Date.now(),
+      });
+      setStatus('✅ Withdrawal request submitted successfully!');
+    } catch (err) {
+      console.error('Withdrawal failed:', err);
+      setStatus('❌ Something went wrong. Try again.');
+    } finally {
+      setWithdrawing(false);
+    }
   };
 
   return (
-    <div>
-      <h3>Withdraw your $CLAIM</h3>
-      <p>Min withdrawal: 10 $CLAIM</p>
-      <button onClick={handleWithdraw} disabled={withdrawing || balance < 10}>
+    <div style={{ marginTop: 40, padding: 24, border: '1px solid #ccc', borderRadius: 8 }}>
+      <h3>💸 Withdraw your $CLAIM</h3>
+      <p style={{ marginBottom: 12 }}>Minimum withdrawal: <strong>10 $CLAIM</strong></p>
+
+      <button
+        onClick={handleWithdraw}
+        disabled={withdrawing || balance < 10}
+        style={{
+          padding: '10px 24px',
+          fontSize: '16px',
+          backgroundColor: balance >= 10 ? '#111' : '#888',
+          color: 'white',
+          border: 'none',
+          borderRadius: '6px',
+          cursor: balance >= 10 && !withdrawing ? 'pointer' : 'not-allowed'
+        }}
+      >
         {withdrawing ? 'Processing...' : 'Withdraw'}
       </button>
+
+      {status && (
+        <p style={{ marginTop: 12, color: status.includes('❌') ? 'red' : 'green' }}>{status}</p>
+      )}
     </div>
   );
 }
-
-export default Withdraw;
