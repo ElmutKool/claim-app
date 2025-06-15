@@ -10,7 +10,16 @@ export default function Dashboard() {
   const [lastClaim, setLastClaim] = useState(null);
   const [cooldown, setCooldown] = useState(0);
 
-  // Kontrolli kasutajat ja loe Firestore andmed
+  const COOLDOWN_TIME = 3 * 60 * 60 * 1000; // 3 hours in ms
+
+  // Live update every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      updateCooldown(lastClaim);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [lastClaim]);
+
   useEffect(() => {
     onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
@@ -36,21 +45,22 @@ export default function Dashboard() {
     });
   }, []);
 
-  // Arvuta cooldown millisekundites
   const updateCooldown = (last) => {
-    if (!last) return;
+    if (!last) {
+      setCooldown(0);
+      return;
+    }
     const now = Date.now();
     const lastTime = new Date(last).getTime();
-    const remaining = 86400000 - (now - lastTime);
+    const remaining = COOLDOWN_TIME - (now - lastTime);
     setCooldown(remaining > 0 ? remaining : 0);
   };
 
-  // BURP-i nõudmine
   const handleClaim = async () => {
     if (!user) return;
+    const now = new Date();
     const userRef = doc(db, 'users', user.uid);
     const newBalance = balance + 10;
-    const now = new Date();
     await updateDoc(userRef, {
       balance: newBalance,
       lastClaim: now,
@@ -60,12 +70,10 @@ export default function Dashboard() {
     updateCooldown(now);
   };
 
-  // Google login
   const handleLogin = async () => {
     await signInWithGoogle();
   };
 
-  // Cooldowni vormindamine
   const formatTime = (ms) => {
     const sec = Math.floor(ms / 1000);
     const h = Math.floor(sec / 3600);
@@ -75,18 +83,46 @@ export default function Dashboard() {
   };
 
   return (
-    <div style={{ padding: 24 }}>
+    <div style={{ padding: 24, maxWidth: 500, margin: '0 auto', textAlign: 'center' }}>
       {user ? (
         <>
           <h2>Welcome, {user.displayName}</h2>
           <p><strong>Wallet:</strong> {wallet || 'Not linked yet'}</p>
-          <p><strong>Balance:</strong> {balance} BURP</p>
-          <p><strong>Last Claim:</strong> {lastClaim ? lastClaim.toString() : 'Never'}</p>
+          <p><strong>Balance:</strong> {balance} $CLAIM</p>
+          <p><strong>Next Claim In:</strong> {formatTime(cooldown)}</p>
 
-          {cooldown > 0 ? (
-            <p>⏳ Next claim in: {formatTime(cooldown)}</p>
+          {cooldown <= 0 ? (
+            <button
+              onClick={handleClaim}
+              style={{
+                marginTop: 24,
+                padding: '12px 24px',
+                fontSize: 18,
+                backgroundColor: '#4CAF50',
+                color: 'white',
+                border: 'none',
+                borderRadius: 8,
+                cursor: 'pointer',
+              }}
+            >
+              🎁 Claim 10 $CLAIM
+            </button>
           ) : (
-            <button onClick={handleClaim}>Claim 10 BURP</button>
+            <button
+              disabled
+              style={{
+                marginTop: 24,
+                padding: '12px 24px',
+                fontSize: 18,
+                backgroundColor: '#ccc',
+                color: '#666',
+                border: 'none',
+                borderRadius: 8,
+                cursor: 'not-allowed',
+              }}
+            >
+              ⏳ Claim available in {formatTime(cooldown)}
+            </button>
           )}
         </>
       ) : (
