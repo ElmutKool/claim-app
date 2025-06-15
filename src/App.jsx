@@ -6,6 +6,7 @@ import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firest
 import WalletConnect from './WalletConnect.jsx';
 import Withdraw from './Withdraw.jsx';
 import Leaderboard from './Leaderboard.jsx';
+import Dashboard from './Dashboard.jsx';
 
 const CLAIM_INTERVAL = 3 * 60 * 60 * 1000; // 3h
 
