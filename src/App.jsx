@@ -4,8 +4,8 @@ import { auth, firestore, signInWithGoogle } from './firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import WalletConnect from './WalletConnect.jsx';
-import Withdraw from './Withdraw';
-import Leaderboard from './Leaderboard';
+import Withdraw from './Withdraw.jsx';
+import Leaderboard from './Leaderboard.jsx';
 
 const CLAIM_INTERVAL = 3 * 60 * 60 * 1000; // 3h
 
